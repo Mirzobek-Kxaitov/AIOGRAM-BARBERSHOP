@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sartaroshxona Bot</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .service {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .service:hover {
+            background: var(--tg-theme-button-color, #0088cc);
+            color: white;
+        }
+
+        .booking-form {
+            display: none;
+            padding: 20px 0;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background: var(--tg-theme-button-color, #0088cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            width: 100%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="services">
+        <h2>🔸 Xizmatlarni tanlang:</h2>
+
+        <div class="service" onclick="selectService('soch_olish', '50000')">
+            <h3>✂️ Soch olish</h3>
+            <p>50,000 so'm • 30 daqiqa</p>
+        </div>
+
+        <div class="service" onclick="selectService('soqol_olish', '30000')">
+            <h3>🪒 Soqol olish</h3>
+            <p>30,000 so'm • 15 daqiqa</p>
+        </div>
+
+        <div class="service" onclick="selectService('soch_yuvish', '25000')">
+            <h3>🧴 Soch yuvish</h3>
+            <p>25,000 so'm • 20 daqiqa</p>
+        </div>
+    </div>
+
+    <div id="booking-form" class="booking-form">
+        <h2>📅 Bron ma'lumotlari:</h2>
+
+        <input type="text" id="client-name" placeholder="Ismingiz" required>
+        <input type="tel" id="client-phone" placeholder="Telefon raqami" required>
+
+        <select id="booking-date" required>
+            <option value="">Sanani tanlang</option>
+        </select>
+
+        <select id="booking-time" required>
+            <option value="">Vaqtni tanlang</option>
+            <option value="09:00">09:00</option>
+            <option value="10:00">10:00</option>
+            <option value="11:00">11:00</option>
+            <option value="12:00">12:00</option>
+            <option value="14:00">14:00</option>
+            <option value="15:00">15:00</option>
+            <option value="16:00">16:00</option>
+            <option value="17:00">17:00</option>
+        </select>
+
+        <button onclick="confirmBooking()">✅ Bronni tasdiqlash</button>
+        <button onclick="showServices()" style="background: #999; margin-top: 10px;">⬅️ Orqaga</button>
+    </div>
+
+    <script>
+        let selectedService = null;
+        let selectedPrice = null;
+
+        // Telegram Web App ni ishga tushirish
+        window.Telegram.WebApp.ready();
+
+        // Dates populate qilish (keyingi 7 kun)
+        function populateDates() {
+            const dateSelect = document.getElementById('booking-date');
+            const today = new Date();
+
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+
+                const option = document.createElement('option');
+                option.value = date.toISOString().split('T')[0];
+                option.textContent = date.toLocaleDateString('uz-UZ', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                dateSelect.appendChild(option);
+            }
+        }
+
+        function selectService(service, price) {
+            selectedService = service;
+            selectedPrice = price;
+
+            document.getElementById('services').style.display = 'none';
+            document.getElementById('booking-form').style.display = 'block';
+
+            // Main button o'rnatish
+            window.Telegram.WebApp.MainButton.setText('Bronni yuborish');
+            window.Telegram.WebApp.MainButton.show();
+        }
+
+        function showServices() {
+            document.getElementById('services').style.display = 'block';
+            document.getElementById('booking-form').style.display = 'none';
+
+            window.Telegram.WebApp.MainButton.hide();
+        }
+
+        function confirmBooking() {
+            const name = document.getElementById('client-name').value;
+            const phone = document.getElementById('client-phone').value;
+            const date = document.getElementById('booking-date').value;
+            const time = document.getElementById('booking-time').value;
+
+            if (!name || !phone || !date || !time) {
+                alert('Iltimos, barcha maydonlarni to\'ldiring!');
+                return;
+            }
+
+            const bookingData = {
+                service: selectedService,
+                price: selectedPrice,
+                name: name,
+                phone: phone,
+                date: date,
+                time: time
+            };
+
+            // Telegram bot ga ma'lumotlarni yuborish
+            window.Telegram.WebApp.sendData(JSON.stringify(bookingData));
+        }
+
+        // Sahifa yuklanganda
+        window.onload = function() {
+            populateDates();
+        };
+    </script>
+</body>
+</html>
