@@ -156,13 +156,20 @@ function confirmBooking() {
         return;
     }
 
+    // O'zbekcha nomlar
+    const serviceNames = {
+        'soch_olish': 'Soch olish',
+        'soqol_olish': 'Soqol olish',
+        'soch_yuvish': 'Soch yuvish'
+    };
+
     const bookingData = {
-        service: selectedService,
-        price: selectedPrice,
-        name: name,
-        phone: phone,
-        date: date,
-        time: time
+        xizmat: serviceNames[selectedService] || selectedService,
+        narx: selectedPrice + ' so\'m',
+        ism: name,
+        telefon: phone,
+        sana: date,
+        vaqt: time
     };
 
     // Test uchun alert ko'rsatamiz
@@ -171,15 +178,27 @@ function confirmBooking() {
     // Telegram Web App mavjudligini tekshiramiz
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.sendData(JSON.stringify(bookingData));
+        // Web app ni yopish
+        window.Telegram.WebApp.close();
     } else {
         alert('Telegram Web App API topilmadi!');
     }
 }
-          
+
+
+// MainButton event listener qo'shish
+window.Telegram.WebApp.onEvent('mainButtonClicked', function() {
+    confirmBooking();
+});
+
         // Sahifa yuklanganda
-        window.onload = function() {
-            populateDates();
-        };
+window.onload = function() {
+    populateDates();
+
+    // MainButton ni sozlash
+    window.Telegram.WebApp.MainButton.setText('📤 Bronni yuborish');
+    window.Telegram.WebApp.MainButton.hide(); // Avval yashirib qo'yamiz
+};
     </script>
 </body>
 </html>
