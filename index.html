@@ -156,7 +156,6 @@ function confirmBooking() {
         return;
     }
 
-    // O'zbekcha nomlar
     const serviceNames = {
         'soch_olish': 'Soch olish',
         'soqol_olish': 'Soqol olish',
@@ -172,16 +171,23 @@ function confirmBooking() {
         vaqt: time
     };
 
-    // Test uchun alert ko'rsatamiz
-    alert('Bron ma\'lumotlari:\n' + JSON.stringify(bookingData, null, 2));
+    // Debug - console ga yozish
+    console.log('Ma\'lumotlar yuborilmoqda:', bookingData);
+    console.log('JSON:', JSON.stringify(bookingData));
 
     // Telegram Web App mavjudligini tekshiramiz
-    if (window.Telegram && window.Telegram.WebApp) {
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.sendData) {
+        console.log('sendData chaqirilmoqda...');
         window.Telegram.WebApp.sendData(JSON.stringify(bookingData));
-        // Web app ni yopish
+        console.log('sendData yakunlandi');
         window.Telegram.WebApp.close();
     } else {
         alert('Telegram Web App API topilmadi!');
+        console.log('Telegram API mavjud emas:', {
+            Telegram: window.Telegram,
+            WebApp: window.Telegram?.WebApp,
+            sendData: window.Telegram?.WebApp?.sendData
+        });
     }
 }
 
