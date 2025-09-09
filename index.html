@@ -50,6 +50,14 @@
             width: 100%;
             cursor: pointer;
         }
+
+        .copy-notice {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -94,6 +102,10 @@
             <option value="17:00">17:00</option>
         </select>
 
+        <div class="copy-notice">
+            💡 Bron ma'lumotlari avtomatik nusxalanadi va botga yuboriladi
+        </div>
+
         <button onclick="confirmBooking()">✅ Bronni tasdiqlash</button>
         <button onclick="showServices()" style="background: #999; margin-top: 10px;">⬅️ Orqaga</button>
     </div>
@@ -134,7 +146,7 @@
             document.getElementById('booking-form').style.display = 'block';
 
             // Main button o'rnatish
-            window.Telegram.WebApp.MainButton.setText('Bronni yuborish');
+            window.Telegram.WebApp.MainButton.setText('📤 Bronni yuborish');
             window.Telegram.WebApp.MainButton.show();
         }
 
@@ -145,66 +157,77 @@
             window.Telegram.WebApp.MainButton.hide();
         }
 
-function confirmBooking() {
-    const name = document.getElementById('client-name').value;
-    const phone = document.getElementById('client-phone').value;
-    const date = document.getElementById('booking-date').value;
-    const time = document.getElementById('booking-time').value;
+        function confirmBooking() {
+            const name = document.getElementById('client-name').value;
+            const phone = document.getElementById('client-phone').value;
+            const date = document.getElementById('booking-date').value;
+            const time = document.getElementById('booking-time').value;
 
-    if (!name || !phone || !date || !time) {
-        alert('Iltimos, barcha maydonlarni to\'ldiring!');
-        return;
-    }
+            if (!name || !phone || !date || !time) {
+                alert('Iltimos, barcha maydonlarni to\'ldiring!');
+                return;
+            }
 
-    const serviceNames = {
-        'soch_olish': 'Soch olish',
-        'soqol_olish': 'Soqol olish',
-        'soch_yuvish': 'Soch yuvish'
-    };
+            const serviceNames = {
+                'soch_olish': 'Soch olish',
+                'soqol_olish': 'Soqol olish',
+                'soch_yuvish': 'Soch yuvish'
+            };
 
-    const bookingData = {
-        xizmat: serviceNames[selectedService] || selectedService,
-        narx: selectedPrice + ' so\'m',
-        ism: name,
-        telefon: phone,
-        sana: date,
-        vaqt: time
-    };
+            // Oddiy matn formatida yuborish (bot oson parse qila oladi)
+            const bookingText = `BRON:${serviceNames[selectedService]}|${selectedPrice}|${name}|${phone}|${date}|${time}`;
+            
+            // Clipboard ga nusxalash va botga yuborish
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(bookingText).then(() => {
+                    alert('Bron ma\'lumotlari nusxalandi! Endi botga yuboring (Ctrl+V).');
+                    window.Telegram.WebApp.close();
+                }).catch(() => {
+                    // Agar clipboard ishlamasa
+                    showBookingText(bookingText);
+                });
+            } else {
+                // Eski browserlar uchun
+                showBookingText(bookingText);
+            }
+        }
 
-    // Debug - console ga yozish
-    console.log('Ma\'lumotlar yuborilmoqda:', bookingData);
-    console.log('JSON:', JSON.stringify(bookingData));
+        function showBookingText(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.top = '0';
+            textarea.style.left = '0';
+            textarea.style.width = '1px';
+            textarea.style.height = '1px';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                alert('Bron ma\'lumotlari nusxalandi! Endi botga yuboring.');
+            } catch (err) {
+                prompt('Bu matnni nusxalab, botga yuboring:', text);
+            }
+            
+            document.body.removeChild(textarea);
+            window.Telegram.WebApp.close();
+        }
 
-    // Telegram Web App mavjudligini tekshiramiz
-    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.sendData) {
-        console.log('sendData chaqirilmoqda...');
-        window.Telegram.WebApp.sendData(JSON.stringify(bookingData));
-        console.log('sendData yakunlandi');
-        window.Telegram.WebApp.close();
-    } else {
-        alert('Telegram Web App API topilmadi!');
-        console.log('Telegram API mavjud emas:', {
-            Telegram: window.Telegram,
-            WebApp: window.Telegram?.WebApp,
-            sendData: window.Telegram?.WebApp?.sendData
+        // MainButton event listener qo'shish
+        window.Telegram.WebApp.onEvent('mainButtonClicked', function() {
+            confirmBooking();
         });
-    }
-}
-
-
-// MainButton event listener qo'shish
-window.Telegram.WebApp.onEvent('mainButtonClicked', function() {
-    confirmBooking();
-});
 
         // Sahifa yuklanganda
-window.onload = function() {
-    populateDates();
+        window.onload = function() {
+            populateDates();
 
-    // MainButton ni sozlash
-    window.Telegram.WebApp.MainButton.setText('📤 Bronni yuborish');
-    window.Telegram.WebApp.MainButton.hide(); // Avval yashirib qo'yamiz
-};
+            // MainButton ni sozlash
+            window.Telegram.WebApp.MainButton.setText('📤 Bronni yuborish');
+            window.Telegram.WebApp.MainButton.hide();
+        };
     </script>
 </body>
 </html>
