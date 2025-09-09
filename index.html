@@ -145,30 +145,37 @@
             window.Telegram.WebApp.MainButton.hide();
         }
 
-        function confirmBooking() {
-            const name = document.getElementById('client-name').value;
-            const phone = document.getElementById('client-phone').value;
-            const date = document.getElementById('booking-date').value;
-            const time = document.getElementById('booking-time').value;
+function confirmBooking() {
+    const name = document.getElementById('client-name').value;
+    const phone = document.getElementById('client-phone').value;
+    const date = document.getElementById('booking-date').value;
+    const time = document.getElementById('booking-time').value;
 
-            if (!name || !phone || !date || !time) {
-                alert('Iltimos, barcha maydonlarni to\'ldiring!');
-                return;
-            }
+    if (!name || !phone || !date || !time) {
+        alert('Iltimos, barcha maydonlarni to\'ldiring!');
+        return;
+    }
 
-            const bookingData = {
-                service: selectedService,
-                price: selectedPrice,
-                name: name,
-                phone: phone,
-                date: date,
-                time: time
-            };
+    const bookingData = {
+        service: selectedService,
+        price: selectedPrice,
+        name: name,
+        phone: phone,
+        date: date,
+        time: time
+    };
 
-            // Telegram bot ga ma'lumotlarni yuborish
-            window.Telegram.WebApp.sendData(JSON.stringify(bookingData));
-        }
+    // Test uchun alert ko'rsatamiz
+    alert('Bron ma\'lumotlari:\n' + JSON.stringify(bookingData, null, 2));
 
+    // Telegram Web App mavjudligini tekshiramiz
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.sendData(JSON.stringify(bookingData));
+    } else {
+        alert('Telegram Web App API topilmadi!');
+    }
+}
+          
         // Sahifa yuklanganda
         window.onload = function() {
             populateDates();
