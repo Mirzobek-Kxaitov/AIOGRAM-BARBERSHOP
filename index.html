@@ -174,21 +174,36 @@
                 'soch_yuvish': 'Soch yuvish'
             };
 
-            // Oddiy matn formatida yuborish (bot oson parse qila oladi)
+            // Bot uchun matn formatini tayyorlash
             const bookingText = `BRON:${serviceNames[selectedService]}|${selectedPrice}|${name}|${phone}|${date}|${time}`;
             
-            // Clipboard ga nusxalash va botga yuborish
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(bookingText).then(() => {
-                    alert('Bron ma\'lumotlari nusxalandi! Endi botga yuboring (Ctrl+V).');
+            console.log('Yuborilayotgan data:', bookingText);
+            
+            // Telegram Web App sendData ni sinab ko'rish
+            if (window.Telegram?.WebApp?.sendData) {
+                try {
+                    window.Telegram.WebApp.sendData(bookingText);
+                    console.log('sendData muvaffaqiyatli chaqirildi');
                     window.Telegram.WebApp.close();
-                }).catch(() => {
-                    // Agar clipboard ishlamasa
-                    showBookingText(bookingText);
+                } catch (error) {
+                    console.error('sendData xatosi:', error);
+                    fallbackMethod(bookingText);
+                }
+            } else {
+                console.log('sendData mavjud emas, fallback ishlatilmoqda');
+                fallbackMethod(bookingText);
+            }
+        }
+
+        function fallbackMethod(text) {
+            // Agar sendData ishlamasa, clipboard usulini ishlatamiz
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Ma\'lumotlar nusxalandi! Botga yuboring (Ctrl+V)');
+                    window.Telegram.WebApp.close();
                 });
             } else {
-                // Eski browserlar uchun
-                showBookingText(bookingText);
+                showBookingText(text);
             }
         }
 
