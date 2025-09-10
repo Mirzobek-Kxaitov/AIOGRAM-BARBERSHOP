@@ -39,6 +39,7 @@
             margin: 10px 0;
             border: 1px solid #ccc;
             border-radius: 4px;
+            box-sizing: border-box;
         }
 
         button {
@@ -49,14 +50,16 @@
             border-radius: 6px;
             width: 100%;
             cursor: pointer;
+            margin: 5px 0;
         }
 
-        .copy-notice {
+        .debug-info {
             background: #f0f0f0;
             padding: 10px;
             border-radius: 4px;
             margin: 10px 0;
-            font-size: 14px;
+            font-size: 12px;
+            display: none;
         }
     </style>
 </head>
@@ -102,12 +105,12 @@
             <option value="17:00">17:00</option>
         </select>
 
-        <div class="copy-notice">
-            💡 Bron ma'lumotlari avtomatik nusxalanadi va botga yuboriladi
+        <div class="debug-info" id="debug-info">
+            Debug ma'lumotlari bu yerda ko'rinadi
         </div>
 
         <button onclick="confirmBooking()">✅ Bronni tasdiqlash</button>
-        <button onclick="showServices()" style="background: #999; margin-top: 10px;">⬅️ Orqaga</button>
+        <button onclick="showServices()" style="background: #999;">⬅️ Orqaga</button>
     </div>
 
     <script>
@@ -115,7 +118,16 @@
         let selectedPrice = null;
 
         // Telegram Web App ni ishga tushirish
-        window.Telegram.WebApp.ready();
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+
+        // Debug funksiyasi
+        function debugLog(message) {
+            console.log(message);
+            const debugDiv = document.getElementById('debug-info');
+            debugDiv.style.display = 'block';
+            debugDiv.innerHTML += '<br>' + message;
+        }
 
         // Dates populate qilish (keyingi 7 kun)
         function populateDates() {
@@ -145,21 +157,21 @@
             document.getElementById('services').style.display = 'none';
             document.getElementById('booking-form').style.display = 'block';
 
-            // Main button o'rnatish
-            window.Telegram.WebApp.MainButton.setText('📤 Bronni yuborish');
-            window.Telegram.WebApp.MainButton.show();
+            // Main button ni yashirish (chunki oddiy button ishlatamiz)
+            tg.MainButton.hide();
         }
 
         function showServices() {
             document.getElementById('services').style.display = 'block';
             document.getElementById('booking-form').style.display = 'none';
-
-            window.Telegram.WebApp.MainButton.hide();
+            tg.MainButton.hide();
         }
 
         function confirmBooking() {
-            const name = document.getElementById('client-name').value;
-            const phone = document.getElementById('client-phone').value;
+            debugLog('confirmBooking() chaqirildi');
+
+            const name = document.getElementById('client-name').value.trim();
+            const phone = document.getElementById('client-phone').value.trim();
             const date = document.getElementById('booking-date').value;
             const time = document.getElementById('booking-time').value;
 
@@ -176,73 +188,78 @@
 
             // Bot uchun matn formatini tayyorlash
             const bookingText = `BRON:${serviceNames[selectedService]}|${selectedPrice}|${name}|${phone}|${date}|${time}`;
-            
-            console.log('Yuborilayotgan data:', bookingText);
-            
-            // Telegram Web App sendData ni sinab ko'rish
-            if (window.Telegram?.WebApp?.sendData) {
+            debugLog('Tayyorlangan data: ' + bookingText);
+
+            // Telegram Web App mavjudligini tekshirish
+            if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
+                debugLog('Telegram Web App topildi');
+
                 try {
-                    window.Telegram.WebApp.sendData(bookingText);
-                    console.log('sendData muvaffaqiyatli chaqirildi');
-                    window.Telegram.WebApp.close();
+                    // sendData funksiyasini chaqirish
+                    debugLog('sendData chaqirilmoqda...');
+                    tg.sendData(bookingText);
+                    debugLog('sendData muvaffaqiyatli!');
+
+                    // Web App ni yopish
+                    setTimeout(() => {
+                        tg.close();
+                    }, 500);
+
                 } catch (error) {
-                    console.error('sendData xatosi:', error);
-                    fallbackMethod(bookingText);
+                    debugLog('sendData xatosi: ' + error.message);
+                    // Agar sendData ishlamasa, MainButton orqali sinab ko'ramiz
+                    showMainButton(bookingText);
                 }
             } else {
-                console.log('sendData mavjud emas, fallback ishlatilmoqda');
-                fallbackMethod(bookingText);
+                debugLog('Telegram Web App topilmadi');
+                // Agar Web App muhitida emas bo'lsa
+                alert('Bu ilova faqat Telegram botida ishlaydi!');
             }
         }
 
-        function fallbackMethod(text) {
-            // Agar sendData ishlamasa, clipboard usulini ishlatamiz
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(text).then(() => {
-                    alert('Ma\'lumotlar nusxalandi! Botga yuboring (Ctrl+V)');
-                    window.Telegram.WebApp.close();
-                });
-            } else {
-                showBookingText(text);
-            }
-        }
+        function showMainButton(data) {
+            debugLog('MainButton ko\'rsatilmoqda');
 
-        function showBookingText(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.top = '0';
-            textarea.style.left = '0';
-            textarea.style.width = '1px';
-            textarea.style.height = '1px';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            
-            try {
-                document.execCommand('copy');
-                alert('Bron ma\'lumotlari nusxalandi! Endi botga yuboring.');
-            } catch (err) {
-                prompt('Bu matnni nusxalab, botga yuboring:', text);
-            }
-            
-            document.body.removeChild(textarea);
-            window.Telegram.WebApp.close();
-        }
+            // Ma'lumotni saqlash
+            window.bookingData = data;
 
-        // MainButton event listener qo'shish
-        window.Telegram.WebApp.onEvent('mainButtonClicked', function() {
-            confirmBooking();
-        });
+            // MainButton ni sozlash
+            tg.MainButton.setText('📤 Bronni yuborish');
+            tg.MainButton.show();
+
+            // MainButton event handler
+            tg.MainButton.onClick(function() {
+                debugLog('MainButton bosildi');
+                try {
+                    tg.sendData(window.bookingData);
+                    debugLog('MainButton orqali yuborildi');
+                    setTimeout(() => {
+                        tg.close();
+                    }, 500);
+                } catch (error) {
+                    debugLog('MainButton xatosi: ' + error.message);
+                    alert('Ma\'lumot yuborishda xatolik yuz berdi!');
+                }
+            });
+        }
 
         // Sahifa yuklanganda
         window.onload = function() {
+            debugLog('Sahifa yuklandi');
             populateDates();
 
-            // MainButton ni sozlash
-            window.Telegram.WebApp.MainButton.setText('📤 Bronni yuborish');
-            window.Telegram.WebApp.MainButton.hide();
+            // Web App sozlamalari
+            tg.expand();
+            tg.MainButton.hide();
+
+            debugLog('Telegram Web App versiyasi: ' + tg.version);
+            debugLog('Platform: ' + tg.platform);
         };
+
+        // Debug rejimi uchun
+        if (window.location.hash === '#debug') {
+            document.getElementById('debug-info').style.display = 'block';
+        }
     </script>
 </body>
 </html>
