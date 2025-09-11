@@ -667,47 +667,43 @@
             copyAndSend(bookingText);
         }
 
-        // Copy booking text and send to bot
+        // Send booking data to bot automatically
         function copyAndSend(text) {
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(text).then(() => {
-                    showSuccess();
-                }).catch(() => {
-                    fallbackCopy(text);
+            if (window.Telegram && window.Telegram.WebApp) {
+                // Telegram WebApp orqali avtomatik yuborish
+                const bookingData = {
+                    service: selectedServiceName,
+                    price: selectedPrice,
+                    name: document.getElementById('client-name').value.trim(),
+                    phone: document.getElementById('client-phone').value.trim(),
+                    date: document.getElementById('booking-date').value,
+                    time: document.getElementById('selected-time').value,
+                    booking_text: text
+                };
+
+                // Ma'lumotlarni botga yuborish
+                window.Telegram.WebApp.sendData(JSON.stringify(bookingData));
+                
+                // Muvaffaqiyat xabari
+                window.Telegram.WebApp.showAlert('✅ Bron muvaffaqiyatli yuborildi!', () => {
+                    window.Telegram.WebApp.close();
                 });
             } else {
+                // Agar Telegram WebApp mavjud bo'lmasa, fallback method
                 fallbackCopy(text);
             }
         }
 
-        // Fallback copy method
+        // Fallback copy method (faqat test uchun)
         function fallbackCopy(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-
-            try {
-                document.execCommand('copy');
-                showSuccess();
-            } catch (err) {
-                prompt('Bu matnni nusxalab, botga yuboring:', text);
-            }
-
-            document.body.removeChild(textarea);
-        }
-
-        // Show success message
-        function showSuccess() {
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.showAlert('✅ Bron ma\'lumotlari nusxalandi! Endi botga yuboring (Ctrl+V).', () => {
-                    window.Telegram.WebApp.close();
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('✅ Bron ma\'lumotlari nusxalandi! Endi botga yuboring (Ctrl+V).');
+                }).catch(() => {
+                    prompt('Bu matnni nusxalab, botga yuboring:', text);
                 });
             } else {
-                alert('✅ Bron ma\'lumotlari nusxalandi! Endi botga yuboring.');
-                window.close();
+                prompt('Bu matnni nusxalab, botga yuboring:', text);
             }
         }
 
