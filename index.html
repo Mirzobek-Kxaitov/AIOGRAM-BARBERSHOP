@@ -3,262 +3,748 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sartaroshxona Bot</title>
+    <title>Sartaroshxona - Professional Style</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+            color: var(--tg-theme-text-color, #2c3e50);
+            line-height: 1.6;
+            min-height: 100vh;
             padding: 20px;
-            background: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
         }
 
-        .service {
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .services-grid {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .service-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
-        .service:hover {
-            background: var(--tg-theme-button-color, #0088cc);
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: var(--tg-theme-button-color, #3498db);
+        }
+
+        .service-card.selected {
+            background: var(--tg-theme-button-color, #3498db);
             color: white;
+            transform: translateY(-3px);
+        }
+
+        .service-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .service-icon {
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 10px;
+        }
+
+        .service-card.selected .service-icon {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .service-title {
+            font-size: 18px;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .service-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--tg-theme-button-color, #27ae60);
+        }
+
+        .service-card.selected .service-price {
+            color: #fff;
+        }
+
+        .service-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 8px;
+        }
+
+        .service-card.selected .service-details {
+            color: rgba(255, 255, 255, 0.8);
         }
 
         .booking-form {
             display: none;
-            padding: 20px 0;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
+        .form-group {
+            margin-bottom: 20px;
         }
 
-        button {
-            background: var(--tg-theme-button-color, #0088cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .form-input, .form-select {
             width: 100%;
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--tg-theme-button-color, #3498db);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #bdc3c7;
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .time-slot {
+            padding: 12px 8px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            text-align: center;
             cursor: pointer;
-            margin: 5px 0;
+            transition: all 0.3s ease;
+            background: white;
+            font-size: 14px;
+            font-weight: 500;
         }
 
-        .debug-info {
-            background: #f0f0f0;
-            padding: 10px;
-            border-radius: 4px;
-            margin: 10px 0;
-            font-size: 12px;
+        .time-slot:hover {
+            border-color: var(--tg-theme-button-color, #3498db);
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .time-slot.selected {
+            background: var(--tg-theme-button-color, #3498db);
+            color: white;
+            border-color: var(--tg-theme-button-color, #3498db);
+        }
+
+        .time-slot.unavailable {
+            background: #ecf0f1;
+            color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--tg-theme-button-color, #3498db);
+            color: var(--tg-theme-button-text-color, white);
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .summary {
+            background: rgba(46, 204, 113, 0.1);
+            border: 2px solid #2ecc71;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .summary h3 {
+            color: #27ae60;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .summary-total {
+            border-top: 1px solid #2ecc71;
+            padding-top: 10px;
+            margin-top: 10px;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .notice {
+            background: rgba(241, 196, 15, 0.1);
+            border: 1px solid #f1c40f;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
             display: none;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .time-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
     </style>
 </head>
 <body>
-    <div id="services">
-        <h2>🔸 Xizmatlarni tanlang:</h2>
-
-        <div class="service" onclick="selectService('soch_olish', '50000')">
-            <h3>✂️ Soch olish</h3>
-            <p>50,000 so'm • 30 daqiqa</p>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <span>✂️</span>
+                Professional Style
+            </h1>
+            <p>🕐 Ish vaqti: 9:00 - 20:00 • 📞 +998 90 123 45 67</p>
         </div>
 
-        <div class="service" onclick="selectService('soqol_olish', '30000')">
-            <h3>🪒 Soqol olish</h3>
-            <p>30,000 so'm • 15 daqiqa</p>
+        <!-- Services Selection -->
+        <div id="services-section">
+            <div class="services-grid">
+                <div class="service-card" onclick="selectService('soch_olish', 50000, 30)">
+                    <div class="service-header">
+                        <div class="service-icon">✂️</div>
+                        <div class="service-title">Soch olish (erkaklar)</div>
+                        <div class="service-price">50,000 so'm</div>
+                    </div>
+                    <div class="service-details">
+                        <span>⏱️ 30 daqiqa</span>
+                        <span>👨‍🦱 Professional kesim</span>
+                    </div>
+                </div>
+
+                <div class="service-card" onclick="selectService('soqol_olish', 30000, 20)">
+                    <div class="service-header">
+                        <div class="service-icon">🪒</div>
+                        <div class="service-title">Soqol olish</div>
+                        <div class="service-price">30,000 so'm</div>
+                    </div>
+                    <div class="service-details">
+                        <span>⏱️ 20 daqiqa</span>
+                        <span>🪒 Soqol va mo'ylov</span>
+                    </div>
+                </div>
+
+                <div class="service-card" onclick="selectService('soch_soqol', 70000, 45)">
+                    <div class="service-header">
+                        <div class="service-icon">💈</div>
+                        <div class="service-title">Soch + Soqol</div>
+                        <div class="service-price">70,000 so'm</div>
+                    </div>
+                    <div class="service-details">
+                        <span>⏱️ 45 daqiqa</span>
+                        <span>🔥 Eng mashur</span>
+                    </div>
+                </div>
+
+                <div class="service-card" onclick="selectService('soch_yuvish', 25000, 25)">
+                    <div class="service-header">
+                        <div class="service-icon">🧴</div>
+                        <div class="service-title">Yuvish va ukladka</div>
+                        <div class="service-price">25,000 so'm</div>
+                    </div>
+                    <div class="service-details">
+                        <span>⏱️ 25 daqiqa</span>
+                        <span>✨ Shampoo + styling</span>
+                    </div>
+                </div>
+
+                <div class="service-card" onclick="selectService('stilistik_kesim', 80000, 60)">
+                    <div class="service-header">
+                        <div class="service-icon">🎨</div>
+                        <div class="service-title">Stilistik kesim</div>
+                        <div class="service-price">80,000 so'm</div>
+                    </div>
+                    <div class="service-details">
+                        <span>⏱️ 60 daqiqa</span>
+                        <span>⭐ Premium xizmat</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="service" onclick="selectService('soch_yuvish', '25000')">
-            <h3>🧴 Soch yuvish</h3>
-            <p>25,000 so'm • 20 daqiqa</p>
+        <!-- Booking Form -->
+        <div id="booking-section" class="booking-form">
+            <h2 style="margin-bottom: 20px; text-align: center;">📅 Bron ma'lumotlari</h2>
+            
+            <!-- Selected Service Summary -->
+            <div id="selected-summary" class="summary"></div>
+
+            <form id="booking-form">
+                <div class="form-group">
+                    <label class="form-label">👤 Ismingiz</label>
+                    <input type="text" id="client-name" class="form-input" placeholder="To'liq ismingizni kiriting" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">📞 Telefon raqami</label>
+                    <input type="tel" id="client-phone" class="form-input" placeholder="+998 90 123 45 67" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">📅 Sanani tanlang</label>
+                    <select id="booking-date" class="form-select" required onchange="updateTimeSlots()">
+                        <option value="">Sanani tanlang</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">🕐 Vaqtni tanlang</label>
+                    <div id="time-slots" class="time-grid">
+                        <!-- Time slots will be populated by JavaScript -->
+                    </div>
+                    <input type="hidden" id="selected-time" required>
+                </div>
+
+                <div class="notice">
+                    <span>💡</span>
+                    <div>
+                        <strong>Eslatma:</strong> Bron ma'lumotlari avtomatik nusxalanadi va botga yuboriladi. 
+                        Vaqtidan 30 daqiqa oldin kelishingizni so'raymiz.
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button type="button" class="btn btn-secondary" onclick="showServices()">
+                        ⬅️ Orqaga
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        ✅ Bronni tasdiqlash
+                    </button>
+                </div>
+            </form>
         </div>
-    </div>
-
-    <div id="booking-form" class="booking-form">
-        <h2>📅 Bron ma'lumotlari:</h2>
-
-        <input type="text" id="client-name" placeholder="Ismingiz" required>
-        <input type="tel" id="client-phone" placeholder="Telefon raqami" required>
-
-        <select id="booking-date" required>
-            <option value="">Sanani tanlang</option>
-        </select>
-
-        <select id="booking-time" required>
-            <option value="">Vaqtni tanlang</option>
-            <option value="09:00">09:00</option>
-            <option value="10:00">10:00</option>
-            <option value="11:00">11:00</option>
-            <option value="12:00">12:00</option>
-            <option value="14:00">14:00</option>
-            <option value="15:00">15:00</option>
-            <option value="16:00">16:00</option>
-            <option value="17:00">17:00</option>
-        </select>
-
-        <div class="debug-info" id="debug-info">
-            Debug ma'lumotlari bu yerda ko'rinadi
-        </div>
-
-        <button onclick="confirmBooking()">✅ Bronni tasdiqlash</button>
-        <button onclick="showServices()" style="background: #999;">⬅️ Orqaga</button>
     </div>
 
     <script>
         let selectedService = null;
         let selectedPrice = null;
+        let selectedDuration = null;
+        let selectedServiceName = null;
 
-        // Telegram Web App ni ishga tushirish
-        const tg = window.Telegram.WebApp;
-        tg.ready();
+        // Service names mapping
+        const serviceNames = {
+            'soch_olish': 'Soch olish (erkaklar)',
+            'soqol_olish': 'Soqol olish',
+            'soch_soqol': 'Soch + Soqol',
+            'soch_yuvish': 'Yuvish va ukladka',
+            'stilistik_kesim': 'Stilistik kesim'
+        };
 
-        // Debug funksiyasi
-        function debugLog(message) {
-            console.log(message);
-            const debugDiv = document.getElementById('debug-info');
-            debugDiv.style.display = 'block';
-            debugDiv.innerHTML += '<br>' + message;
+        // Available time slots
+        const timeSlots = [
+            '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+            '12:00', '12:30', '14:00', '14:30', '15:00', '15:30',
+            '16:00', '16:30', '17:00', '17:30', '18:00', '18:30',
+            '19:00', '19:30'
+        ];
+
+        // Initialize Telegram Web App
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+            
+            // Set main button
+            window.Telegram.WebApp.MainButton.setText('📤 Bronni yuborish');
+            window.Telegram.WebApp.MainButton.hide();
+            
+            // Main button click handler
+            window.Telegram.WebApp.onEvent('mainButtonClicked', function() {
+                submitBooking();
+            });
         }
 
-        // Dates populate qilish (keyingi 7 kun)
+        // Populate dates (next 14 days)
         function populateDates() {
             const dateSelect = document.getElementById('booking-date');
             const today = new Date();
 
-            for (let i = 0; i < 7; i++) {
+            for (let i = 0; i < 14; i++) {
                 const date = new Date(today);
                 date.setDate(today.getDate() + i);
+
+                // Skip Sundays (assuming closed on Sundays)
+                if (date.getDay() === 0) continue;
 
                 const option = document.createElement('option');
                 option.value = date.toISOString().split('T')[0];
                 option.textContent = date.toLocaleDateString('uz-UZ', {
                     weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
+                    day: 'numeric',
+                    month: 'long'
                 });
+                
+                if (i === 0) {
+                    option.textContent += ' (Bugun)';
+                } else if (i === 1) {
+                    option.textContent += ' (Ertaga)';
+                }
+                
                 dateSelect.appendChild(option);
             }
         }
 
-        function selectService(service, price) {
-            selectedService = service;
-            selectedPrice = price;
+        // Update time slots based on selected date
+        function updateTimeSlots() {
+            const selectedDate = document.getElementById('booking-date').value;
+            const timeSlotsContainer = document.getElementById('time-slots');
+            const selectedTimeInput = document.getElementById('selected-time');
+            
+            timeSlotsContainer.innerHTML = '';
+            selectedTimeInput.value = '';
 
-            document.getElementById('services').style.display = 'none';
-            document.getElementById('booking-form').style.display = 'block';
+            if (!selectedDate) return;
 
-            // Main button ni yashirish (chunki oddiy button ishlatamiz)
-            tg.MainButton.hide();
-        }
+            const today = new Date();
+            const bookingDate = new Date(selectedDate + 'T00:00:00');
+            const isToday = bookingDate.toDateString() === today.toDateString();
 
-        function showServices() {
-            document.getElementById('services').style.display = 'block';
-            document.getElementById('booking-form').style.display = 'none';
-            tg.MainButton.hide();
-        }
-
-        function confirmBooking() {
-            debugLog('confirmBooking() chaqirildi');
-
-            const name = document.getElementById('client-name').value.trim();
-            const phone = document.getElementById('client-phone').value.trim();
-            const date = document.getElementById('booking-date').value;
-            const time = document.getElementById('booking-time').value;
-
-            if (!name || !phone || !date || !time) {
-                alert('Iltimos, barcha maydonlarni to\'ldiring!');
-                return;
-            }
-
-            const serviceNames = {
-                'soch_olish': 'Soch olish',
-                'soqol_olish': 'Soqol olish',
-                'soch_yuvish': 'Soch yuvish'
-            };
-
-            // Bot uchun matn formatini tayyorlash
-            const bookingText = `BRON:${serviceNames[selectedService]}|${selectedPrice}|${name}|${phone}|${date}|${time}`;
-            debugLog('Tayyorlangan data: ' + bookingText);
-
-            // Telegram Web App mavjudligini tekshirish
-            if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
-                debugLog('Telegram Web App topildi');
-
-                try {
-                    // sendData funksiyasini chaqirish
-                    debugLog('sendData chaqirilmoqda...');
-                    tg.sendData(bookingText);
-                    debugLog('sendData muvaffaqiyatli!');
-
-                    // Web App ni yopish
-                    setTimeout(() => {
-                        tg.close();
-                    }, 500);
-
-                } catch (error) {
-                    debugLog('sendData xatosi: ' + error.message);
-                    // Agar sendData ishlamasa, MainButton orqali sinab ko'ramiz
-                    showMainButton(bookingText);
+            timeSlots.forEach(time => {
+                const timeSlot = document.createElement('div');
+                timeSlot.className = 'time-slot';
+                timeSlot.textContent = time;
+                
+                // Disable past times for today
+                if (isToday) {
+                    const [hour, minute] = time.split(':');
+                    const slotTime = new Date();
+                    slotTime.setHours(parseInt(hour), parseInt(minute), 0, 0);
+                    
+                    if (slotTime <= today) {
+                        timeSlot.className += ' unavailable';
+                        timeSlot.style.pointerEvents = 'none';
+                        return;
+                    }
                 }
-            } else {
-                debugLog('Telegram Web App topilmadi');
-                // Agar Web App muhitida emas bo'lsa
-                alert('Bu ilova faqat Telegram botida ishlaydi!');
-            }
-        }
-
-        function showMainButton(data) {
-            debugLog('MainButton ko\'rsatilmoqda');
-
-            // Ma'lumotni saqlash
-            window.bookingData = data;
-
-            // MainButton ni sozlash
-            tg.MainButton.setText('📤 Bronni yuborish');
-            tg.MainButton.show();
-
-            // MainButton event handler
-            tg.MainButton.onClick(function() {
-                debugLog('MainButton bosildi');
-                try {
-                    tg.sendData(window.bookingData);
-                    debugLog('MainButton orqali yuborildi');
-                    setTimeout(() => {
-                        tg.close();
-                    }, 500);
-                } catch (error) {
-                    debugLog('MainButton xatosi: ' + error.message);
-                    alert('Ma\'lumot yuborishda xatolik yuz berdi!');
-                }
+                
+                timeSlot.onclick = () => selectTime(time, timeSlot);
+                timeSlotsContainer.appendChild(timeSlot);
             });
         }
 
-        // Sahifa yuklanganda
-        window.onload = function() {
-            debugLog('Sahifa yuklandi');
+        // Select time slot
+        function selectTime(time, element) {
+            // Remove previous selection
+            document.querySelectorAll('.time-slot.selected').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+            
+            // Add selection to clicked slot
+            element.classList.add('selected');
+            document.getElementById('selected-time').value = time;
+            
+            // Show main button
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.MainButton.show();
+            }
+        }
+
+        // Select service
+        function selectService(service, price, duration) {
+            selectedService = service;
+            selectedPrice = price;
+            selectedDuration = duration;
+            selectedServiceName = serviceNames[service];
+
+            // Update UI
+            document.getElementById('services-section').style.display = 'none';
+            document.getElementById('booking-section').style.display = 'block';
+
+            // Update summary
+            updateSummary();
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Update service summary
+        function updateSummary() {
+            const summaryDiv = document.getElementById('selected-summary');
+            summaryDiv.innerHTML = `
+                <h3>✅ Tanlangan xizmat</h3>
+                <div class="summary-item">
+                    <span>Xizmat:</span>
+                    <span>${selectedServiceName}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Davomiyligi:</span>
+                    <span>${selectedDuration} daqiqa</span>
+                </div>
+                <div class="summary-item summary-total">
+                    <span>Jami narx:</span>
+                    <span>${selectedPrice.toLocaleString()} so'm</span>
+                </div>
+            `;
+        }
+
+        // Show services page
+        function showServices() {
+            document.getElementById('services-section').style.display = 'block';
+            document.getElementById('booking-section').style.display = 'none';
+            
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.MainButton.hide();
+            }
+        }
+
+        // Format phone number
+        function formatPhoneNumber(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.startsWith('998')) {
+                value = value.substring(3);
+            }
+            
+            if (value.length > 0) {
+                value = '+998 ' + value.substring(0, 2) + ' ' + value.substring(2, 5) + ' ' + value.substring(5, 7) + ' ' + value.substring(7, 9);
+            }
+            
+            input.value = value;
+        }
+
+        // Submit booking
+        function submitBooking() {
+            const name = document.getElementById('client-name').value.trim();
+            const phone = document.getElementById('client-phone').value.trim();
+            const date = document.getElementById('booking-date').value;
+            const time = document.getElementById('selected-time').value;
+
+            // Validation
+            if (!name || !phone || !date || !time) {
+                alert('❌ Iltimos, barcha maydonlarni to\'ldiring!');
+                return;
+            }
+
+            if (name.length < 2) {
+                alert('❌ Ism kamida 2 ta harf bo\'lishi kerak!');
+                return;
+            }
+
+            if (phone.length < 10) {
+                alert('❌ Telefon raqami noto\'g\'ri formatda!');
+                return;
+            }
+
+            // Create booking text
+            const bookingText = `BRON:${selectedServiceName}|${selectedPrice}|${name}|${phone}|${date}|${time}`;
+
+            // Try to copy to clipboard and send to bot
+            copyAndSend(bookingText);
+        }
+
+        // Copy booking text and send to bot
+        function copyAndSend(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showSuccess();
+                }).catch(() => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        // Fallback copy method
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+
+            try {
+                document.execCommand('copy');
+                showSuccess();
+            } catch (err) {
+                prompt('Bu matnni nusxalab, botga yuboring:', text);
+            }
+
+            document.body.removeChild(textarea);
+        }
+
+        // Show success message
+        function showSuccess() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.showAlert('✅ Bron ma\'lumotlari nusxalandi! Endi botga yuboring (Ctrl+V).', () => {
+                    window.Telegram.WebApp.close();
+                });
+            } else {
+                alert('✅ Bron ma\'lumotlari nusxalandi! Endi botga yuboring.');
+                window.close();
+            }
+        }
+
+        // Form submit handler
+        document.getElementById('booking-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitBooking();
+        });
+
+        // Phone number formatting
+        document.getElementById('client-phone').addEventListener('input', function() {
+            formatPhoneNumber(this);
+        });
+
+        // Initialize when page loads
+        window.addEventListener('load', function() {
             populateDates();
+            
+            // Auto-select current time if today
+            setTimeout(() => {
+                const dateSelect = document.getElementById('booking-date');
+                if (dateSelect.options.length > 0) {
+                    dateSelect.selectedIndex = 1; // Select today
+                    updateTimeSlots();
+                }
+            }, 100);
+        });
 
-            // Web App sozlamalari
-            tg.expand();
-            tg.MainButton.hide();
-
-            debugLog('Telegram Web App versiyasi: ' + tg.version);
-            debugLog('Platform: ' + tg.platform);
-        };
-
-        // Debug rejimi uchun
-        if (window.location.hash === '#debug') {
-            document.getElementById('debug-info').style.display = 'block';
+        // Handle back button
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.onEvent('backButtonClicked', function() {
+                if (document.getElementById('booking-section').style.display !== 'none') {
+                    showServices();
+                } else {
+                    window.Telegram.WebApp.close();
+                }
+            });
         }
     </script>
 </body>
